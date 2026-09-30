@@ -15,16 +15,20 @@ KEY = "KUNCI123"
 def parse_args():
     p = argparse.ArgumentParser(
         description="Sender DES (TCP client). Semua argumen opsional; "
-                    "default di-hardcode di bagian atas file ini."
     )
-    p.add_argument("--host", default=TARGET_HOST,
-                   help=f"Alamat receiver (default: {TARGET_HOST})")
-    p.add_argument("--port", type=int, default=PORT,
-                   help=f"Port (default: {PORT})")
-    p.add_argument("--key", help='Override key 8 karakter ASCII, mis. "KUNCI123"')
-    p.add_argument("--key-hex", help="Override key 16 digit hex, mis. 133457799BBCDFF1")
+    p.add_argument(
+        "--host", default=TARGET_HOST, help=f"Alamat receiver (default: {TARGET_HOST})"
+    )
+    p.add_argument(
+        "--port", type=int, default=PORT, help=f"Port (default: {PORT})"
+    )
+    p.add_argument(
+        "--key", help='Override key 8 karakter ASCII, mis. "KUNCI123"'
+    )
+    p.add_argument(
+        "--key-hex", help="Override key 16 digit hex, mis. 133457799BBCDFF1"
+    )
     return p.parse_args()
-
 
 def resolve_key(args):
     if args.key is None and args.key_hex is None:
