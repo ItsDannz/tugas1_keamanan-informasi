@@ -1,4 +1,3 @@
-import argparse
 import socket
 import sys
 
@@ -8,7 +7,6 @@ from common import (
     recv_frame,
     to_hex,
     from_hex,
-    parse_key,
     key_from_config,
     CTRL_QUIT,
 )
@@ -17,46 +15,21 @@ TARGET_HOST = "127.0.0.1"
 PORT = 5000
 KEY = "KUNCI123"
 
-def parse_args():
-    p = argparse.ArgumentParser(
-        description="Sender DES (TCP client). Semua argumen opsional; "
-    )
-    p.add_argument(
-        "--host", default=TARGET_HOST, help=f"Alamat receiver (default: {TARGET_HOST})"
-    )
-    p.add_argument(
-        "--port", type=int, default=PORT, help=f"Port (default: {PORT})"
-    )
-    p.add_argument(
-        "--key", help='Override key 8 karakter ASCII, mis. "KUNCI123"'
-    )
-    p.add_argument(
-        "--key-hex", help="Override key 16 digit hex, mis. 133457799BBCDFF1"
-    )
-    return p.parse_args()
-
-def resolve_key(args):
-    if args.key is None and args.key_hex is None:
-        return key_from_config(KEY)
-    return parse_key(args.key, args.key_hex)
-
-
 def main() -> int:
-    args = parse_args()
     try:
-        key = resolve_key(args)
+        key = key_from_config(KEY)
     except ValueError as exc:
         print(f"[!] Key tidak valid: {exc}")
         return 1
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        sock.connect((args.host, args.port))
+        sock.connect((TARGET_HOST, PORT))
     except OSError as exc:
-        print(f"[!] Tidak bisa terhubung ke {args.host}:{args.port} -> {exc}")
+        print(f"[!] Tidak bisa terhubung ke {TARGET_HOST}:{PORT} -> {exc}")
         return 1
 
-    print(f"[*] Terhubung ke receiver {args.host}:{args.port}")
+    print(f"[*] Terhubung ke receiver {TARGET_HOST}:{PORT}")
     print( "[*] Key sudah tersimpan lokal (tidak dikirim ke jaringan).")
     print( "[*] Ketik pesan lalu Enter. Ketik /quit untuk mengakhiri.\n")
 
