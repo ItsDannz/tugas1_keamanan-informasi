@@ -64,7 +64,7 @@ utuh lewat TCP, konversi hex, dan validasi key.
      return payload
    ```
    - `_recv_exact(sock, 4)` membaca tepat 4 byte. Cek header, jika None maka koneksi sudah ditutup dan akan mereturn `None`.
-   - s
+   - `struct.unpack(">I", header)` mengubah 4 byte header kembali menjadi angka `length`.
    - Jika `length` = 0, maka return frame kosong
    - Jika `length` > `MAX_PAYLOAD`, maka tampilkan error
    - Selan itu baca `length` byte payload dengan `_recv_exact`
@@ -96,7 +96,11 @@ utuh lewat TCP, konversi hex, dan validasi key.
           )
       return data
    ```
-   
+   - `isinstance(raw, bytes)`: jika `KEY` sudah berupa `bytes`, maka pakai langsung.
+   - `raw.lower().startswith("0x")`: jika `KEY` berupa hex, ambil bagian setelah `0x` lalu ubah dengan `bytes.fromhex`.
+   - `else`: selain itu anggap `KEY` sebagai string ASCII biasa, encode ke UTF-8.
+   - Validasi panjang harus 8 byte, jika tidak maka `raise ValueError`.
+   <br>
    
    
 ### des.py
