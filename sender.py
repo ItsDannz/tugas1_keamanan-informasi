@@ -4,7 +4,12 @@ import sys
 
 import des
 from common import (
-    send_frame, recv_frame, to_hex, from_hex, parse_key, key_from_config,
+    send_frame,
+    recv_frame,
+    to_hex,
+    from_hex,
+    parse_key,
+    key_from_config,
     CTRL_QUIT,
 )
 
