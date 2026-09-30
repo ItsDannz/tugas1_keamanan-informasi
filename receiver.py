@@ -1,4 +1,3 @@
-import argparse
 import socket
 import sys
 
@@ -7,7 +6,6 @@ from common import (
     CTRL_QUIT,
     from_hex,
     key_from_config,
-    parse_key,
     recv_frame,
     send_frame,
     to_hex,
@@ -17,31 +15,9 @@ BIND_HOST = "0.0.0.0"
 PORT = 5000
 KEY = "KUNCI123"
 
-def parse_args():
-    p = argparse.ArgumentParser(
-        description="Receiver DES (TCP server). Semua argumen opsional; "
-                    "default di-hardcode di bagian atas file ini."
-    )
-    p.add_argument("--host", default=BIND_HOST,
-                   help=f"Alamat bind (default: {BIND_HOST})")
-    p.add_argument("--port", type=int, default=PORT,
-                   help=f"Port (default: {PORT})")
-    p.add_argument("--key", help='Override key 8 karakter ASCII, mis. "KUNCI123"')
-    p.add_argument("--key-hex", help="Override key 16 digit hex, mis. 133457799BBCDFF1")
-    return p.parse_args()
-
-
-def resolve_key(args):
-    """Tentukan key: prioritas argumen CLI, fallback ke KEY yang di-hardcode."""
-    if args.key is None and args.key_hex is None:
-        return key_from_config(KEY)
-    return parse_key(args.key, args.key_hex)
-
-
 def main() -> int:
-    args = parse_args()
     try:
-        key = resolve_key(args)
+        key = key_from_config(KEY)
     except ValueError as exc:
         print(f"[!] Key tidak valid: {exc}")
         return 1
@@ -50,12 +26,12 @@ def main() -> int:
     if sys.platform != "win32":
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
-        server.bind((args.host, args.port))
+        server.bind((BIND_HOST, PORT))
     except OSError as exc:
-        print(f"[!] Gagal bind ke {args.host}:{args.port} -> {exc}")
+        print(f"[!] Gagal bind ke {BIND_HOST}:{PORT} -> {exc}")
         return 1
     server.listen(1)
-    print(f"[*] Receiver siap. Listening di {args.host}:{args.port} ...")
+    print(f"[*] Receiver siap. Listening di {BIND_HOST}:{PORT} ...")
     print( "[*] Key sudah tersimpan lokal (tidak dikirim ke jaringan).")
 
     try:
