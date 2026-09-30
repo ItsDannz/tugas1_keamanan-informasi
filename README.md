@@ -4,6 +4,14 @@
 | ---            | ---        |
 | Hazza Danta Hermandanu               | 5025241117           |
 
+## Screenshot
+### Receiver (VM Ubuntu)
+<img width="545" height="134" alt="WhatsApp Image 2026-10-01 at 06 37 21" src="https://github.com/user-attachments/assets/89504333-4045-4292-a8d9-7884b561b9f4" />
+
+### Sender (Windows)
+<img width="707" height="220" alt="image" src="https://github.com/user-attachments/assets/842db971-c64e-4f82-ba11-65346ba6ed24" />
+
+
 ## Penjelasan Code
 ### common.py
 Semua hal berulang yang digunakan sender & receiver: mengirim/menerima pesan
