@@ -4,11 +4,9 @@ MAX_PAYLOAD = 1 << 20
 
 CTRL_QUIT = b"QUIT"
 
-
 def send_frame(sock, payload: bytes) -> None:
     header = struct.pack(">I", len(payload))
     sock.sendall(header + payload)
-
 
 def _recv_exact(sock, n: int):
     buf = bytearray()
@@ -18,7 +16,6 @@ def _recv_exact(sock, n: int):
             return None
         buf += chunk
     return bytes(buf)
-
 
 def recv_frame(sock):
     header = _recv_exact(sock, 4)
@@ -34,14 +31,11 @@ def recv_frame(sock):
     payload = _recv_exact(sock, length)
     return payload
 
-
 def to_hex(data: bytes) -> str:
     return data.hex().upper()
 
-
 def from_hex(text: str) -> bytes:
     return bytes.fromhex(text)
-
 
 def key_from_config(raw) -> bytes:
     if isinstance(raw, bytes):
@@ -57,25 +51,3 @@ def key_from_config(raw) -> bytes:
             "Gunakan 8 karakter ASCII atau hex 16 digit dengan awalan 0x."
         )
     return data
-
-
-def parse_key(key_str, key_hex) -> bytes:
-    if (key_str is None) == (key_hex is None):
-        raise ValueError("Sediakan tepat satu dari --key atau --key-hex.")
-
-    if key_str is not None:
-        key = key_str.encode("utf-8")
-        if len(key) != 8:
-            raise ValueError(
-                f"Opsi --key harus tepat 8 byte (diberikan {len(key)} byte). "
-                "Gunakan --key-hex untuk key 16 digit hex."
-            )
-        return key
-
-    try:
-        key = bytes.fromhex(key_hex)
-    except ValueError as exc:
-        raise ValueError("Opsi --key-hex harus berupa hex yang valid.") from exc
-    if len(key) != 8:
-        raise ValueError("Opsi --key-hex harus tepat 16 digit hex (8 byte).")
-    return key
