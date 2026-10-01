@@ -151,7 +151,6 @@ def generate_subkeys(key8: bytes) -> list:
 
 
 def _feistel(r: int, subkey: int) -> int:
-    """Fungsi f(R, K): ekspansi -> XOR subkey -> S-box -> permutasi P."""
     x = permute(r, E, 32) ^ subkey       
 
     out = 0
