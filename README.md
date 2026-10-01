@@ -11,6 +11,9 @@
 ### Sender (Windows)
 <img width="707" height="220" alt="image" src="https://github.com/user-attachments/assets/842db971-c64e-4f82-ba11-65346ba6ed24" />
 
+### Wireshark
+<img width="897" height="85" alt="image" src="https://github.com/user-attachments/assets/5e8b6a1f-6411-42b9-864d-77ba38a77293" />
+
 
 ## Penjelasan Code
 ### common.py
