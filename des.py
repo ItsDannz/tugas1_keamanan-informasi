@@ -1,19 +1,3 @@
-"""
-des.py — Implementasi algoritma DES (Data Encryption Standard) MURNI.
-
-Seluruh proses diimplementasikan manual dari nol sesuai FIPS 46-3:
-  - Initial Permutation (IP) & Final Permutation (IP^-1 / FP)
-  - Key schedule (PC-1, PC-2, per-round left shift)
-  - 16 round Feistel, fungsi f (ekspansi E, S-box S1..S8, permutasi P)
-  - Mode ECB + padding PKCS#7 untuk pesan dengan panjang arbitrer
-
-TIDAK menggunakan library kriptografi apa pun.
-"""
-
-# ---------------------------------------------------------------------------
-# Tabel-tabel standar DES (indeks 1-based, MSB-first) — JANGAN DIUBAH
-# ---------------------------------------------------------------------------
-
 IP = [
     58, 50, 42, 34, 26, 18, 10, 2,
     60, 52, 44, 36, 28, 20, 12, 4,
@@ -137,16 +121,7 @@ SBOXES = [
     ],
 ]
 
-
-# ---------------------------------------------------------------------------
-# Operasi dasar
-# ---------------------------------------------------------------------------
-
 def permute(block: int, table: list, in_bits: int) -> int:
-    """Permutasi bit `block` (sepanjang `in_bits`) mengikuti `table` (1-based).
-
-    Bit ke-1 adalah bit paling kiri (MSB). Hasil dikembalikan sebagai integer.
-    """
     out = 0
     for pos in table:
         out = (out << 1) | ((block >> (in_bits - pos)) & 1)
@@ -154,41 +129,39 @@ def permute(block: int, table: list, in_bits: int) -> int:
 
 
 def _rotl28(value: int, shift: int) -> int:
-    """Rotasi kiri 28-bit untuk pergeseran key schedule."""
     return ((value << shift) | (value >> (28 - shift))) & 0x0FFFFFFF
 
 
 def generate_subkeys(key8: bytes) -> list:
-    """Menghasilkan 16 subkey 48-bit dari key 8 byte (key schedule)."""
     if len(key8) != 8:
         raise ValueError("Key DES harus tepat 8 byte.")
 
     key64 = int.from_bytes(key8, "big")
-    key56 = permute(key64, PC1, 64)          # 64 -> 56 bit
-    c = (key56 >> 28) & 0x0FFFFFFF           # 28 bit kiri
-    d = key56 & 0x0FFFFFFF                   # 28 bit kanan
+    key56 = permute(key64, PC1, 64)          
+    c = (key56 >> 28) & 0x0FFFFFFF           
+    d = key56 & 0x0FFFFFFF                   
 
     subkeys = []
     for shift in SHIFTS:
         c = _rotl28(c, shift)
         d = _rotl28(d, shift)
-        cd = (c << 28) | d                    # gabung 56 bit
-        subkeys.append(permute(cd, PC2, 56))  # 56 -> 48 bit
+        cd = (c << 28) | d                    
+        subkeys.append(permute(cd, PC2, 56)) 
     return subkeys
 
 
 def _feistel(r: int, subkey: int) -> int:
     """Fungsi f(R, K): ekspansi -> XOR subkey -> S-box -> permutasi P."""
-    x = permute(r, E, 32) ^ subkey           # 32 -> 48 bit, XOR dengan subkey
+    x = permute(r, E, 32) ^ subkey       
 
     out = 0
     for i in range(8):
-        six = (x >> (42 - 6 * i)) & 0x3F     # ambil grup 6-bit (dari kiri)
-        row = ((six & 0x20) >> 4) | (six & 1)  # bit1 & bit6
-        col = (six >> 1) & 0x0F              # bit2..bit5
+        six = (x >> (42 - 6 * i)) & 0x3F     
+        row = ((six & 0x20) >> 4) | (six & 1)  
+        col = (six >> 1) & 0x0F         
         out = (out << 4) | SBOXES[i][row][col]
 
-    return permute(out, P, 32)               # 32 bit hasil
+    return permute(out, P, 32)             
 
 
 def des_encrypt_block(block8: bytes, subkeys: list) -> bytes:
@@ -203,7 +176,6 @@ def des_encrypt_block(block8: bytes, subkeys: list) -> bytes:
     for i in range(16):
         left, right = right, left ^ _feistel(right, subkeys[i])
 
-    # Catatan: setelah 16 round, blok preoutput = R16 || L16 (posisi ditukar)
     preoutput = (right << 32) | left
     return permute(preoutput, FP, 64).to_bytes(8, "big")
 
@@ -213,10 +185,6 @@ def des_decrypt_block(block8: bytes, subkeys: list) -> bytes:
     return des_encrypt_block(block8, subkeys[::-1])
 
 
-# ---------------------------------------------------------------------------
-# Padding PKCS#7 + mode ECB untuk pesan
-# ---------------------------------------------------------------------------
-
 def pad_pkcs7(data: bytes) -> bytes:
     """Padding PKCS#7 sampai panjang kelipatan 8."""
     pad_len = 8 - (len(data) % 8)
@@ -224,7 +192,6 @@ def pad_pkcs7(data: bytes) -> bytes:
 
 
 def unpad_pkcs7(data: bytes) -> bytes:
-    """Menghapus padding PKCS#7; raise ValueError bila padding tidak valid."""
     if not data or len(data) % 8 != 0:
         raise ValueError("Panjang data tidak valid untuk PKCS#7.")
     pad_len = data[-1]
@@ -236,7 +203,6 @@ def unpad_pkcs7(data: bytes) -> bytes:
 
 
 def encrypt_message(plaintext: bytes, key8: bytes) -> bytes:
-    """Enkripsi pesan (bytes) dengan DES mode ECB + padding PKCS#7."""
     subkeys = generate_subkeys(key8)
     data = pad_pkcs7(plaintext)
     out = bytearray()
@@ -246,7 +212,6 @@ def encrypt_message(plaintext: bytes, key8: bytes) -> bytes:
 
 
 def decrypt_message(ciphertext: bytes, key8: bytes) -> bytes:
-    """Dekripsi pesan (bytes) dengan DES mode ECB + hapus padding PKCS#7."""
     if not ciphertext or len(ciphertext) % 8 != 0:
         raise ValueError("Panjang ciphertext harus kelipatan 8 dan tidak kosong.")
     subkeys = generate_subkeys(key8)
